@@ -107,13 +107,6 @@ RUN dnf install -y aws-hm-client \
 # Point Spark at proper python binary
 ENV PYSPARK_PYTHON=/usr/local/bin/python3
 
-# Override /usr/bin/python3 symlink so `python3` resolves to python3.12 even
-# when /usr/bin precedes /usr/local/bin in PATH. AL2023 ships python3 -> python3.9
-# by default, but we need 3.12 for this image. This runs after all dnf installs
-# (spark-python etc.) so it isn't clobbered by package managers.
-RUN ln -sf /usr/bin/python3.12 /usr/bin/python3 \
-    && ln -sf /usr/bin/pip3.12 /usr/bin/pip3
-
 # Setup Spark/Yarn/HDFS user as root
 ENV PATH="/usr/bin:/opt/program:${PATH}"
 ENV YARN_RESOURCEMANAGER_USER="root"
@@ -141,7 +134,6 @@ WORKDIR $SPARK_HOME
 
 # Install the sagemaker feature store spark connector
 # https://docs.aws.amazon.com/sagemaker/latest/dg/batch-ingestion-spark-connector-setup.html
-# Feature store connector library currently does not support spark 3.4 so commenting out this line
 RUN /usr/local/bin/python3 -m pip install sagemaker-feature-store-pyspark==2.0.0 --no-binary :all:
 
 ENTRYPOINT ["smspark-submit"]
